@@ -122,5 +122,6 @@ class Config:
         else:
             raise ValueError(f"No API key configured for model: {model_identifier}")
 
+
 # Create a singleton instance
 global_config = Config()
