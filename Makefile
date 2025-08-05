@@ -5,17 +5,17 @@ RED=\033[0;31m
 BLUE=\033[0;34m
 RESET=\033[0m
 
-PYTHON=rye run python
-TEST=rye run pytest
+PYTHON=uv run python
+TEST=uv run pytest
 PROJECT_ROOT=.
 
 ########################################################
 # Initialization: Delete later
 ########################################################
 
-banner: check_rye
+banner: check_uv
 	@echo "$(YELLOW)🔍Generating banner...$(RESET)"
-	@rye run python -m init.generate_banner
+	@uv run python -m init.generate_banner
 	@echo "$(GREEN)✅Banner generated.$(RESET)"
 
 
@@ -23,13 +23,13 @@ banner: check_rye
 # Check dependencies
 ########################################################
 
-check_rye:
-	@echo "$(YELLOW)🔍Checking rye version...$(RESET)"
-	@if ! command -v rye > /dev/null 2>&1; then \
-		echo "$(RED)rye is not installed. Please install rye before proceeding.$(RESET)"; \
+check_uv:
+	@echo "$(YELLOW)🔍Checking uv version...$(RESET)"
+	@if ! command -v uv > /dev/null 2>&1; then \
+		echo "$(RED)uv is not installed. Please install uv before proceeding.$(RESET)"; \
 		exit 1; \
 	else \
-		rye --version; \
+		uv --version; \
 	fi
 
 check_jq:
@@ -55,9 +55,16 @@ setup_githooks:
 # Python dependency-related
 ########################################################
 
-update_python_dep: check_rye
+setup: check_uv
+	@echo "$(YELLOW)🔎Looking for .venv...$(RESET)"
+	@if [ ! -d ".venv" ]; then \
+		echo "$(YELLOW)VS Code is not detected. Creating a new one...$(RESET)"; \
+		uv venv; \
+	else \
+		echo "$(GREEN)✅.venv is detected.$(RESET)"; \
+	fi
 	@echo "$(YELLOW)🔄Updating python dependencies...$(RESET)"
-	@rye sync
+	@uv sync
 
 view_python_venv_size:
 	@echo "$(YELLOW)🔍Checking python venv size...$(RESET)"
@@ -75,7 +82,7 @@ view_python_venv_size_by_libraries:
 # Run Main Application
 ########################################################
 
-all: update_python_dep setup_githooks
+all: setup setup_githooks
 	@echo "$(GREEN)🏁Running main application...$(RESET)"
 	@$(PYTHON) main.py
 	@echo "$(GREEN)✅ Main application run completed.$(RESET)"
@@ -88,7 +95,7 @@ all: update_python_dep setup_githooks
 TEST_TARGETS = tests/
 
 # Tests
-test: check_rye
+test: check_uv
 	@echo "$(GREEN)🧪Running Target Tests...$(RESET)"
 	$(TEST) $(TEST_TARGETS)
 	@echo "$(GREEN)✅Target Tests Passed.$(RESET)"
@@ -102,9 +109,16 @@ test: check_rye
 IGNORE_LINT_DIRS = .venv|venv
 LINE_LENGTH = 88
 
-fmt: check_rye check_jq
+install_tools: check_uv
+	@echo "$(YELLOW)🔧Installing tools...$(RESET)"
+	@uv tool install black --force
+	@uv tool install ty --force
+	@uv tool install vulture --force
+	@echo "$(GREEN)✅Tools installed.$(RESET)"
+
+fmt: install_tools check_jq
 	@echo "$(YELLOW)✨Formatting project with Black...$(RESET)"
-	@rye run black --exclude '/($(IGNORE_LINT_DIRS))/' . --line-length $(LINE_LENGTH)
+	@uv tool run black --exclude '/($(IGNORE_LINT_DIRS))/' . --line-length $(LINE_LENGTH)
 	@echo "$(YELLOW)✨Formatting JSONs with jq...$(RESET)"
 	@count=0; \
 	find . \( $(IGNORE_LINT_DIRS:%=-path './%' -prune -o) \) -type f -name '*.json' -print0 | \
@@ -118,14 +132,14 @@ fmt: check_rye check_jq
 	echo "$(BLUE)$$count JSON file(s)$(RESET) formatted."; \
 	echo "$(GREEN)✅Formatting completed.$(RESET)"
 
-vulture: check_rye
+vulture: install_tools
 	@echo "$(YELLOW)🔍Running Vulture...$(RESET)"
-	@rye run vulture .
+	@uv tool run vulture .
 	@echo "$(GREEN)✅Vulture completed.$(RESET)"
 
-ty: check_rye
+ty: install_tools
 	@echo "$(YELLOW)🔍Running Typer...$(RESET)"
-	@rye run ty check
+	@uv tool run ty check
 	@echo "$(GREEN)✅Typer completed.$(RESET)"
 
 ########################################################
