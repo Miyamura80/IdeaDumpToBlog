@@ -122,22 +122,5 @@ class Config:
         else:
             raise ValueError(f"No API key configured for model: {model_identifier}")
 
-    def api_base(self, model_name: str) -> str:
-        """Returns the Helicone link for the model."""
-        if "gpt" in model_name.lower() or re.match(
-            OPENAI_O_SERIES_PATTERN, model_name.lower()
-        ):
-            return "https://oai.hconeai.com/v1"
-        elif "groq" in model_name.lower():
-            return "https://groq.helicone.ai/openai/v1"
-        elif "perplexity" in model_name.lower():
-            return "https://perplexity.helicone.ai"
-        elif "gemini" in model_name.lower():
-            return "https://generativelanguage.googleapis.com/v1beta/openai/"
-        else:
-            logger.error(f"Helicone link not found for model: {model_name}")
-            return ""
-
-
 # Create a singleton instance
 global_config = Config()
