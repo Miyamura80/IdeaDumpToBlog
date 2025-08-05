@@ -7,9 +7,15 @@ setup_logging()
 
 
 def main():
-    logger.info("Global config: {}", json.dumps(global_config.to_dict(), indent=2, default=lambda o: o.__dict__))
+    logger.info(
+        "Global config: {}",
+        json.dumps(global_config.to_dict(), indent=2, default=lambda o: o.__dict__),
+    )
     logger.info("Model name: {}", global_config.model_name)
-    logger.info("Default LLM config: {}", json.dumps(global_config.default_llm, indent=2, default=lambda o: o.__dict__))
+    logger.info(
+        "Default LLM config: {}",
+        json.dumps(global_config.default_llm, indent=2, default=lambda o: o.__dict__),
+    )
 
 
 if __name__ == "__main__":

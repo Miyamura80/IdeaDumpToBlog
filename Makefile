@@ -111,9 +111,9 @@ LINE_LENGTH = 88
 
 install_tools: check_uv
 	@echo "$(YELLOW)🔧Installing tools...$(RESET)"
-	@uv tool install black
-	@uv tool install ty
-	@uv tool install vulture
+	@uv tool install black --force
+	@uv tool install ty --force
+	@uv tool install vulture --force
 	@echo "$(GREEN)✅Tools installed.$(RESET)"
 
 fmt: install_tools check_jq
